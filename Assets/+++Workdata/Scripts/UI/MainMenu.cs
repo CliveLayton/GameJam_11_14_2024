@@ -13,6 +13,8 @@ public class MainMenu : MonoBehaviour
 
     [SerializeField] private Button[] levelButtons;
 
+    [SerializeField] private Button[] buttons;
+
     private GameManager gameManager;
 
     private void Awake()
@@ -23,6 +25,11 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            buttons[i].onClick.AddListener(MusicManager.Instance.PlayButtonSFX);
+        }
+        
         for (int i = 0; i < levelButtons.Length; i++)
         {
             levelButtons[i].interactable = false;

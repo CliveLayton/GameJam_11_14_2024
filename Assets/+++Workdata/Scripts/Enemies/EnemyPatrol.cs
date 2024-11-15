@@ -10,7 +10,7 @@ public class EnemyPatrol : MonoBehaviour
 
     private void Start()
     {
-        targetPos = posB.position;
+        targetPos = posA.position;
     }
 
     private void Update()

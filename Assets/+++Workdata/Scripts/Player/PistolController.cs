@@ -13,9 +13,9 @@ public class PistolController : MonoBehaviour
     [SerializeField] private float reloadTime = 0.8f;
     [SerializeField] private float maxDistance = 10f;
     [SerializeField] private float knockBackForce = 4f;
+    [SerializeField] private float bulletKnockBackForce = 10f;
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private CanvasGroup lostPanel;
-    [SerializeField] private CanvasGroup winPanel;
     [SerializeField] private TextMeshProUGUI bulletCount;
 
     private Vector2 worldPosition;
@@ -26,10 +26,11 @@ public class PistolController : MonoBehaviour
     private float elapsed = 0f;
     private float hitDistance;
     private float gunForce;
-    private GameManager gameManager;
+    private GameObject gunParticlesInst;
 
     private GameInput inputActions;
     private Rigidbody2D rb;
+    private MusicManager musicManager;
 
     private void Awake()
     {
@@ -41,7 +42,8 @@ public class PistolController : MonoBehaviour
     private void Start()
     {
         bulletCount.text = magazineSize.ToString();
-        gameManager = FindObjectOfType<GameManager>();
+        hasShooted = false;
+        musicManager = FindObjectOfType<MusicManager>();
     }
 
     private void Update()
@@ -76,8 +78,9 @@ public class PistolController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.collider.CompareTag("Enemy"))
+        if (other.gameObject.CompareTag("Enemy"))
         {
+            musicManager.PlaySFX(musicManager.hurtSound);
             Vector2 directionToMove = (other.gameObject.transform.position - transform.position).normalized;
             
             rb.AddForce(-directionToMove * knockBackForce, ForceMode2D.Impulse);
@@ -86,11 +89,12 @@ public class PistolController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Goal"))
+        if (other.gameObject.CompareTag("Enemy"))
         {
-            gameManager.unlockedLevel.Add("Level2");
-            winPanel.ShowCanvasGroup();
-            Time.timeScale = 0f;
+            musicManager.PlaySFX(musicManager.hurtSound);
+            Vector2 directionToMove = (other.gameObject.transform.position - transform.position).normalized;
+            
+            rb.AddForce(-directionToMove * bulletKnockBackForce, ForceMode2D.Impulse);
         }
     }
 
@@ -98,17 +102,20 @@ public class PistolController : MonoBehaviour
     {
         if (context.performed && currentMagazineSize > 0 && !hasShooted)
         {
-            rb.AddForce(- direction * gunForce, ForceMode2D.Impulse);
             currentMagazineSize -= 1;
             hasShooted = true;
-            
+            musicManager.PlaySFX(musicManager.shootSound);
+
             LookForObjects();
+            
+            rb.AddForce(- direction * gunForce, ForceMode2D.Impulse);
             
             bulletCount.text = currentMagazineSize.ToString();
             
 
             if (currentMagazineSize <= 0)
             {
+                musicManager.PlaySFX(musicManager.looseSound);
                 lostPanel.ShowCanvasGroup();
                 Time.timeScale = 0f;
             }
