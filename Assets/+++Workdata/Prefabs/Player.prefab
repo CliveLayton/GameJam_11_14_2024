@@ -51,6 +51,7 @@ MonoBehaviour:
   gun: {fileID: 1243605225500607168}
   maxGunForce: 20
   minGunForce: 8
+  enemyGunForce: 3
   magazineSize: 10
   reloadTime: 1
   maxDistance: 10
@@ -60,8 +61,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   lostPanel: {fileID: 0}
-  winPanel: {fileID: 0}
   bulletCount: {fileID: 0}
+  gunParticlePoint: {fileID: 4271395204796354820}
+  gunParticlesPrefab: {fileID: 423159822169892259, guid: b5dfacd50a8b4864e9e9241a2375662f, type: 3}
+  cinemachineCam: {fileID: 0}
+  shakeIntensity: 0.8
+  shakeTime: 0.5
 --- !u!50 &5315495613861139607
 Rigidbody2D:
   serializedVersion: 4
@@ -231,7 +236,8 @@ Transform:
   m_LocalPosition: {x: 0.103, y: 1.11, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4271395204796354820}
   m_Father: {fileID: 3194554481705463043}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &963315755210653562
@@ -274,8 +280,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
-  m_Sprite: {fileID: -1358130778, guid: ac4a80cf424c81b4b8c3dd5f49cfedd3, type: 3}
+  m_SortingOrder: 111
+  m_Sprite: {fileID: -1058370711, guid: 1a6685fe9e22b3e4d847717c29e98184, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -286,3 +292,34 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &2578826288601642408
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4271395204796354820}
+  m_Layer: 7
+  m_Name: ParticlesPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4271395204796354820
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2578826288601642408}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.515, y: 0.565, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5473928534713862053}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

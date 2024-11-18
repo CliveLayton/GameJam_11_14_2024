@@ -1,7 +1,11 @@
 using System;
+using System.Collections;
+using Cinemachine;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 
 public class PistolController : MonoBehaviour
@@ -9,6 +13,7 @@ public class PistolController : MonoBehaviour
     [SerializeField] private GameObject gun;
     [SerializeField] private float maxGunForce = 10f;
     [SerializeField] private float minGunForce = 1f;
+    [SerializeField] private float enemyGunForce = 1f;
     [SerializeField] private int magazineSize = 10;
     [SerializeField] private float reloadTime = 0.8f;
     [SerializeField] private float maxDistance = 10f;
@@ -17,7 +22,19 @@ public class PistolController : MonoBehaviour
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private CanvasGroup lostPanel;
     [SerializeField] private TextMeshProUGUI bulletCount;
+    [SerializeField] private Transform gunParticlePoint;
+    [SerializeField] private GameObject gunParticlesPrefab;
+    [SerializeField] private CinemachineVirtualCamera cinemachineCam;
+    [SerializeField] private float shakeIntensity;
+    [SerializeField] private float shakeTime;
+    [SerializeField] private Volume volume;
+    [SerializeField] private float blinkSpeed;
 
+
+    private Vignette vignette;
+    private bool doEffect = false;
+    private bool isIncreasing = true;
+    private float vignetteIntensity = 0f;
     private Vector2 worldPosition;
     private Vector2 direction;
     private float angle;
@@ -27,7 +44,10 @@ public class PistolController : MonoBehaviour
     private float hitDistance;
     private float gunForce;
     private GameObject gunParticlesInst;
-
+    private float shakeTimer;
+    private float startingIntensity;
+    private float shakeTimerTotal;
+    
     private GameInput inputActions;
     private Rigidbody2D rb;
     private MusicManager musicManager;
@@ -44,14 +64,57 @@ public class PistolController : MonoBehaviour
         bulletCount.text = magazineSize.ToString();
         hasShooted = false;
         musicManager = FindObjectOfType<MusicManager>();
+
+        // Get the Vignette effect from the Volume Profile
+        if (volume.profile.TryGet(out vignette))
+        {
+            vignette.intensity.overrideState = true; // Enable override
+        }
     }
 
     private void Update()
-    {
+    { 
         HandleGunRotation();
-       
-       if (hasShooted)
+
+        if (doEffect)
+        {
+            if (vignette != null)
+            {
+                if (isIncreasing)
+                {
+                    vignetteIntensity += Time.deltaTime * blinkSpeed;
+                    if (vignetteIntensity >= 0.35f)
+                    {
+                        isIncreasing = false;
+                    }
+                }
+                else
+                {
+                    vignetteIntensity -= Time.deltaTime * blinkSpeed;
+                    if (vignetteIntensity <= 0f)
+                    {
+                        isIncreasing = true;
+                    }
+                }
+
+                vignette.intensity.value = vignetteIntensity;
+            }
+        }
+
+        if (hasShooted)
        {
+           if (shakeTimer > 0)
+           {
+               shakeTimer -= Time.deltaTime;
+               if (shakeTimer <= 0f)
+               {
+                   CinemachineBasicMultiChannelPerlin cinemachineBasicMultiChannelPerlin =
+                       cinemachineCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+
+                   cinemachineBasicMultiChannelPerlin.m_AmplitudeGain = 
+                       Mathf.Lerp(startingIntensity, 0f, 1- (shakeTimer / shakeTimerTotal));
+               }
+           }
            elapsed += Time.deltaTime;
             
            if (elapsed > reloadTime)
@@ -85,6 +148,7 @@ public class PistolController : MonoBehaviour
             
             rb.AddForce(-directionToMove * knockBackForce, ForceMode2D.Impulse);
         }
+        
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -104,7 +168,11 @@ public class PistolController : MonoBehaviour
         {
             currentMagazineSize -= 1;
             hasShooted = true;
+            //ShakeCamera(shakeIntensity, shakeTime);
             musicManager.PlaySFX(musicManager.shootSound);
+            GameObject particles = Instantiate(gunParticlesPrefab, gunParticlePoint.position, gun.transform.rotation);
+            particles.transform.SetParent(null);
+            Destroy(particles, 2f);
 
             LookForObjects();
             
@@ -118,6 +186,15 @@ public class PistolController : MonoBehaviour
                 musicManager.PlaySFX(musicManager.looseSound);
                 lostPanel.ShowCanvasGroup();
                 Time.timeScale = 0f;
+            }
+
+            if (currentMagazineSize <= 2)
+            {
+                doEffect = true;
+            }
+            else
+            {
+                doEffect = false;
             }
         }
     }
@@ -160,6 +237,7 @@ public class PistolController : MonoBehaviour
                 Enemy currentEnemy = rayHit.collider.gameObject.GetComponent<Enemy>();
                 currentEnemy.Damage(1);
                 currentMagazineSize = magazineSize;
+                gunForce = enemyGunForce;
             }
         }
         
@@ -168,6 +246,17 @@ public class PistolController : MonoBehaviour
         {
             gunForce = minGunForce;
         }
+    }
+
+    private void ShakeCamera(float intensity, float time)
+    {
+        CinemachineBasicMultiChannelPerlin cinemachineBasicMultiChannelPerlin =
+            cinemachineCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+
+        cinemachineBasicMultiChannelPerlin.m_AmplitudeGain = intensity;
+        startingIntensity = intensity;
+        shakeTimerTotal = time;
+        shakeTimer = time;
     }
 
     private float CalculateGunForce(float distance)
@@ -179,5 +268,5 @@ public class PistolController : MonoBehaviour
         // Interpolate between minForce and maxForce.
         return Mathf.Lerp(minGunForce, maxGunForce, normalizedDistance);
     }
-    
+
 }

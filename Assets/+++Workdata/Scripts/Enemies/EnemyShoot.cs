@@ -7,6 +7,8 @@ public class EnemyShoot : MonoBehaviour
     [SerializeField] private float reloadTime = 0.8f;
     [SerializeField] private Transform bulletSpawnPoint;
     [SerializeField] private Quaternion bulletRotation;
+    [SerializeField] private Transform gunParticlePoint;
+    [SerializeField] private GameObject gunParticlesPrefab;
 
     private GameObject bulletInst;
     private float elapsed = 0f;
@@ -39,6 +41,9 @@ public class EnemyShoot : MonoBehaviour
         if (!hasShooted && col.enabled)
         {
             bulletInst = Instantiate(bullet, bulletSpawnPoint.position, bulletRotation);
+            GameObject particles = Instantiate(gunParticlesPrefab, gunParticlePoint.position, bulletRotation);
+            particles.transform.SetParent(null);
+            Destroy(particles, 2f);
             
             hasShooted = true;
         }
