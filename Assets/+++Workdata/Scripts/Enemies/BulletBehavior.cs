@@ -27,7 +27,7 @@ public class BulletBehavior : MonoBehaviour
 
     private void SetStraightVelocity()
     {
-        rb.velocity = transform.right * bulletSpeed;
+        rb.linearVelocity = transform.right * bulletSpeed;
     }
 
     private void SetDestroyTime()

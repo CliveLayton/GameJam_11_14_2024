@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using Cinemachine;
 using TMPro;
 using UnityEngine;
@@ -7,7 +5,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class PistolController : MonoBehaviour
 {
@@ -69,7 +66,7 @@ public class PistolController : MonoBehaviour
     {
         bulletCount.text = magazineSize.ToString();
         hasShooted = false;
-        musicManager = FindObjectOfType<MusicManager>();
+        musicManager = FindAnyObjectByType<MusicManager>();
 
         // Get the Vignette effect from the Volume Profile
         if (volume.profile.TryGet(out vignette))

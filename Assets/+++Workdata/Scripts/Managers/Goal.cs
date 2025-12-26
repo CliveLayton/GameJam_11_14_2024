@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Goal : MonoBehaviour
@@ -13,8 +10,8 @@ public class Goal : MonoBehaviour
     
     private void Start()
     {
-        gameManager = FindObjectOfType<GameManager>();
-        musicManager = FindObjectOfType<MusicManager>();
+        gameManager = FindAnyObjectByType<GameManager>();
+        musicManager = FindAnyObjectByType<MusicManager>();
     }
 
     private void OnTriggerEnter2D(Collider2D other)

@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -22,7 +19,7 @@ public class MainMenu : MonoBehaviour
     private void Awake()
     {
         Time.timeScale = 1f;
-        gameManager = FindObjectOfType<GameManager>();
+        gameManager = FindAnyObjectByType<GameManager>();
         Cursor.SetCursor(cursorTexture,new Vector2(1024,1024), CursorMode.Auto);
     }
 
