@@ -11,6 +11,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private CanvasGroup levelSelectionScreen;
     [SerializeField] private CanvasGroup optionScreen;
 
+    [SerializeField] private Texture2D cursorTexture;
+
     [SerializeField] private Button[] levelButtons;
 
     [SerializeField] private Button[] buttons;
@@ -21,6 +23,7 @@ public class MainMenu : MonoBehaviour
     {
         Time.timeScale = 1f;
         gameManager = FindObjectOfType<GameManager>();
+        Cursor.SetCursor(cursorTexture,new Vector2(1024,1024), CursorMode.Auto);
     }
 
     private void Start()

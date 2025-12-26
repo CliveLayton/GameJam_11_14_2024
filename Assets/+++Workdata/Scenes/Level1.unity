@@ -12656,41 +12656,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1091369866}
     - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
-      propertyPath: winPanel
-      value: 
-      objectReference: {fileID: 692986874}
-    - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
       propertyPath: lostPanel
       value: 
       objectReference: {fileID: 542738530}
-    - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
-      propertyPath: shakeTime
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
-      propertyPath: blinkSpeed
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
       propertyPath: bulletCount
       value: 
       objectReference: {fileID: 662893193}
     - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
-      propertyPath: gunParticles
-      value: 
-      objectReference: {fileID: 423159822169892259, guid: b5dfacd50a8b4864e9e9241a2375662f, type: 3}
-    - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
       propertyPath: cinemachineCam
       value: 
       objectReference: {fileID: 136033764}
-    - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
-      propertyPath: shakeIntensity
-      value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 2370607492412790475, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
-      propertyPath: gunParticlesSpawnPoint
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 3194554481705463043, guid: 51e90bb3c0ed0634dbba87e073b6ab25, type: 3}
       propertyPath: m_LocalPosition.x
       value: -11.45

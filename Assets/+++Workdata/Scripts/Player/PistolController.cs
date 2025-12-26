@@ -6,11 +6,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 public class PistolController : MonoBehaviour
 {
     [SerializeField] private GameObject gun;
+    [SerializeField] private GameObject gunVisual;
     [SerializeField] private float maxGunForce = 10f;
     [SerializeField] private float minGunForce = 1f;
     [SerializeField] private float enemyGunForce = 1f;
@@ -36,7 +38,9 @@ public class PistolController : MonoBehaviour
     private bool isIncreasing = true;
     private float vignetteIntensity = 0f;
     private Vector2 worldPosition;
-    private Vector2 direction;
+    private Vector2 aimDirectionNormalized;
+    private float lastValidAngle = 0f;
+    private float rayDistance;
     private float angle;
     private int currentMagazineSize;
     private bool hasShooted = false;
@@ -47,6 +51,7 @@ public class PistolController : MonoBehaviour
     private float shakeTimer;
     private float startingIntensity;
     private float shakeTimerTotal;
+    private LineRenderer aimLine;
     
     private GameInput inputActions;
     private Rigidbody2D rb;
@@ -56,6 +61,7 @@ public class PistolController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         inputActions = new GameInput();
+        aimLine = GetComponentInChildren<LineRenderer>();
         currentMagazineSize = magazineSize;
     }
 
@@ -75,31 +81,8 @@ public class PistolController : MonoBehaviour
     private void Update()
     { 
         HandleGunRotation();
-
-        if (doEffect)
-        {
-            if (vignette != null)
-            {
-                if (isIncreasing)
-                {
-                    vignetteIntensity += Time.deltaTime * blinkSpeed;
-                    if (vignetteIntensity >= 0.35f)
-                    {
-                        isIncreasing = false;
-                    }
-                }
-                else
-                {
-                    vignetteIntensity -= Time.deltaTime * blinkSpeed;
-                    if (vignetteIntensity <= 0f)
-                    {
-                        isIncreasing = true;
-                    }
-                }
-
-                vignette.intensity.value = vignetteIntensity;
-            }
-        }
+        HandleAimLine();
+        HandleVignetteEffect();
 
         if (hasShooted)
        {
@@ -130,6 +113,7 @@ public class PistolController : MonoBehaviour
         inputActions.Enable();
 
         inputActions.Player.Fire.performed += Shoot;
+        inputActions.Player.Restart.performed += Restart;
     }
 
     private void OnDisable()
@@ -137,6 +121,7 @@ public class PistolController : MonoBehaviour
         inputActions.Disable();
         
         inputActions.Player.Fire.performed -= Shoot;
+        inputActions.Player.Restart.performed -= Restart;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -176,7 +161,7 @@ public class PistolController : MonoBehaviour
 
             LookForObjects();
             
-            rb.AddForce(- direction * gunForce, ForceMode2D.Impulse);
+            rb.AddForce(- aimDirectionNormalized * gunForce, ForceMode2D.Impulse);
             
             bulletCount.text = currentMagazineSize.ToString();
             
@@ -199,16 +184,35 @@ public class PistolController : MonoBehaviour
         }
     }
 
+    private void Restart(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
+
     private void HandleGunRotation()
     {
         //rotate the gun towards the mouse position
         worldPosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        direction = (worldPosition - (Vector2)gun.transform.position).normalized;
-        gun.transform.right = direction;
+        Vector2 direction = worldPosition - (Vector2)gun.transform.position;
+        Vector2 directionNormalized = direction.normalized;
         
         //flip the gun when it reaches a 90 degree threshold
         angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         
+        //prevents instability near zero 
+        if (direction.sqrMagnitude > 0.1f)
+        {
+            gun.transform.rotation = Quaternion.Euler(0, 0, angle);
+            lastValidAngle = angle;
+        }
+        else
+        {
+            gun.transform.rotation = Quaternion.Euler(0, 0, lastValidAngle);
+        }
+
         Vector3 localScale = new Vector3(1f, 1f, 1f);
         if (angle > 90 || angle < - 90)
         {
@@ -218,14 +222,35 @@ public class PistolController : MonoBehaviour
         {
             localScale.y = 1f;
         }
+        
+        gunVisual.transform.localScale = localScale;
+    }
 
-        gun.transform.localScale = localScale;
+    private void HandleAimLine()
+    {
+        aimLine.SetPosition(0, aimLine.transform.position);
+        
+        Vector2 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        float aimDistance = (mouseWorldPosition - (Vector2)aimLine.transform.position).magnitude;
+        aimDirectionNormalized = (worldPosition - (Vector2)aimLine.transform.position).normalized;
+        
+        if (aimDistance >= 10)
+        {
+            rayDistance = maxDistance;
+            aimLine.SetPosition(1, (Vector2)aimLine.transform.position + aimDirectionNormalized * 10); 
+        }
+        else
+        {
+            rayDistance = aimDistance;
+            aimLine.SetPosition(1, mouseWorldPosition);
+        }
+        
     }
 
     private void LookForObjects()
     {
-        RaycastHit2D rayHit = Physics2D.Raycast(transform.position, direction, maxDistance, targetLayer);
-        Debug.DrawRay(transform.position, direction * maxDistance, Color.red, 1f);
+        RaycastHit2D rayHit = Physics2D.Raycast(aimLine.transform.position, aimDirectionNormalized, rayDistance, targetLayer);
+        //Debug.DrawRay(aimLine.transform.position, aimDirectionNormalized * maxDistance, Color.red, 1f);
         
         if (rayHit.collider != null)
         {
@@ -267,6 +292,39 @@ public class PistolController : MonoBehaviour
 
         // Interpolate between minForce and maxForce.
         return Mathf.Lerp(minGunForce, maxGunForce, normalizedDistance);
+    }
+
+    private void HandleVignetteEffect()
+    {
+        if (!doEffect && vignette.intensity.value > 0)
+        {
+            vignette.intensity.value = 0;
+        }
+        
+        if (doEffect)
+        {
+            if (vignette != null)
+            {
+                if (isIncreasing)
+                {
+                    vignetteIntensity += Time.deltaTime * blinkSpeed;
+                    if (vignetteIntensity >= 0.35f)
+                    {
+                        isIncreasing = false;
+                    }
+                }
+                else
+                {
+                    vignetteIntensity -= Time.deltaTime * blinkSpeed;
+                    if (vignetteIntensity <= 0f)
+                    {
+                        isIncreasing = true;
+                    }
+                }
+
+                vignette.intensity.value = vignetteIntensity;
+            }
+        }
     }
 
 }
