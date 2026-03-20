@@ -9040,7 +9040,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   winPanel: {fileID: 692986874}
-  addLevelName: Level2
+  unlockLevel: 1
 --- !u!1 &1604325744
 GameObject:
   m_ObjectHideFlags: 0

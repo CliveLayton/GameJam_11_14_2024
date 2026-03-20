@@ -14,17 +14,18 @@ public class MainMenu : MonoBehaviour
 
     [SerializeField] private Button[] buttons;
 
-    private GameManager gameManager;
+    [SerializeField] private GameManager gameManager;
 
     private void Awake()
     {
         Time.timeScale = 1f;
         gameManager = FindAnyObjectByType<GameManager>();
-        Cursor.SetCursor(cursorTexture,new Vector2(1024,1024), CursorMode.Auto);
+        Cursor.SetCursor(cursorTexture,new Vector2(cursorTexture.width * 0.5f,cursorTexture.height * 0.5f), CursorMode.Auto);
     }
 
     private void Start()
     {
+
         for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].onClick.AddListener(MusicManager.Instance.PlayButtonSFX);
@@ -33,11 +34,6 @@ public class MainMenu : MonoBehaviour
         for (int i = 0; i < levelButtons.Length; i++)
         {
             levelButtons[i].interactable = false;
-        }
-
-        for (int i = 0; i < gameManager.unlockedLevel.Count; i++)
-        {
-            levelButtons[i].interactable = true;
         }
     }
 
@@ -60,6 +56,13 @@ public class MainMenu : MonoBehaviour
 
     public void ShowLevelSelection()
     {
+        gameManager = FindAnyObjectByType<GameManager>();
+
+        for (int i = 0; i < gameManager.unlockedLevel; i++)
+        {
+            levelButtons[i].interactable = true;
+        }
+
         mainMenuScreen.HideCanvasGroup();
         levelSelectionScreen.ShowCanvasGroup();
     }

@@ -3,7 +3,7 @@ using UnityEngine;
 public class Goal : MonoBehaviour
 {
     [SerializeField] private CanvasGroup winPanel;
-    [SerializeField] private string addLevelName;
+    [SerializeField] private bool unlockLevel;
     
     private GameManager gameManager;
     private MusicManager musicManager;
@@ -19,9 +19,9 @@ public class Goal : MonoBehaviour
         if (other.gameObject.CompareTag("Player"))
         {
             musicManager.PlaySFX(musicManager.winGame);
-            if (addLevelName != null)
+            if (unlockLevel)
             {
-                gameManager.unlockedLevel.Add(addLevelName);
+                gameManager.unlockedLevel++;
             }
             winPanel.ShowCanvasGroup();
             Time.timeScale = 0f;

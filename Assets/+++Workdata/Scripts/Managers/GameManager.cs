@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    public List<string> unlockedLevel = new List<string>();
+    public int unlockedLevel = 1;
 
     private void Awake()
     {
@@ -20,8 +20,6 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
         
-        DontDestroyOnLoad(this);
-        
-        unlockedLevel.Add("Level1");
+        DontDestroyOnLoad(gameObject);
     }
 }
